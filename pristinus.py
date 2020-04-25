@@ -38,7 +38,7 @@ def relay(on):
         else: LEDstatus=False
     except:  
         apa102("error")
-    	print("Oops, something wrong occurred!") 
+        print("Oops, something wrong occurred!") 
     finally:  
     	GPIO.cleanup()
 
@@ -48,6 +48,7 @@ def uvled(why):
         if LEDstatus:
             relay(False)
             apa102("error")
+            sys.exit("Now you have to reboot the whole machine...")
     else:
     # DOOR OPEN/CLOSED
         if LEDstatus:
@@ -66,7 +67,7 @@ GPIO.setup(Relays,GPIO.OUT,initial=GPIO.LOW)
 # COUPURE
 GPIO.setup(Emergency,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 GPIO.setup(Door,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(Emergency,GPIO.BOTH,callback=uvled,bouncetime=200)
+GPIO.add_event_detect(Emergency,GPIO.RISING,callback=uvled,bouncetime=200)
 GPIO.add_event_detect(Door,GPIO.BOTH,callback=uvled,bouncetime=500)
 
 # GREEN
@@ -76,5 +77,5 @@ try:
     while True:
         pass
 except KeyboardInterrupt:
-    print("Aborted by user")
+    print("\nAborted by user")
 
