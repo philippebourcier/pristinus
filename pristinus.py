@@ -28,10 +28,15 @@ def apa102(scene):
         print(scene)
 
 def relay(on):
-    if on: state=GPIO.HIGH
-    else: state=GPIO.LOW
+    global LEDstatus
+    if on:
+        state=GPIO.HIGH
+    else:
+        state=GPIO.LOW
     try:
         GPIO.output(Relays,on)
+        if on: LEDstatus=True
+        else: LEDstatus=False
     except:  
     	print("Oops, something wrong occurred!") 
     finally:  
@@ -65,9 +70,9 @@ GPIO.add_event_detect(Door,GPIO.BOTH,callback=uvled,bouncetime=500)
 # GREEN
 apa102("available")
 
-while True:
-    try:
+try:
+    while True:
         pass
-    except KeyboardInterrupt:
-        print("Aborted by user\n")
+except KeyboardInterrupt:
+    print("Aborted by user\n")
 
