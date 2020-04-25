@@ -32,8 +32,6 @@ def relay(on):
     else: state=GPIO.LOW
     try:
         GPIO.output(Relays,on)
-    except KeyboardInterrupt:  
-    	print("Aborted by user\n")
     except:  
     	print("Oops, something wrong occurred!") 
     finally:  
@@ -68,5 +66,8 @@ GPIO.add_event_detect(Door,GPIO.BOTH,callback=uvled,bouncetime=500)
 apa102("available")
 
 while True:
-    pass
+    try:
+        pass
+    except KeyboardInterrupt:
+        print("Aborted by user\n")
 
