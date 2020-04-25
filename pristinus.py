@@ -31,7 +31,10 @@ def relay(on):
         state=GPIO.LOW
     try:
         GPIO.output(Relays,state)
-        if on: LEDstatus=True
+        if on:
+            LEDstatus=True
+            sleep(20)
+            GPIO.output(Relays,GPIO.LOW)
         else: LEDstatus=False
     except:  
     	print("Oops, something wrong occurred!") 
