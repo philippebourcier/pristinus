@@ -1,9 +1,5 @@
 #!/usr/bin/python3
 
-# PIN 22
-# PIN 23
-# PIN 25
-
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -34,7 +30,7 @@ def relay(on):
     else:
         state=GPIO.LOW
     try:
-        GPIO.output(Relays,on)
+        GPIO.output(Relays,state)
         if on: LEDstatus=True
         else: LEDstatus=False
     except:  
@@ -43,11 +39,13 @@ def relay(on):
     	GPIO.cleanup()
 
 def uvled(why):
+    # BIG RED BUTTON
     if why==Emergency:
         if LEDstatus:
             relay(False)
             apa102("error")
     else:
+    # DOOR OPEN/CLOSED
         if LEDstatus:
             relay(False)
             apa102("available")
@@ -74,5 +72,5 @@ try:
     while True:
         pass
 except KeyboardInterrupt:
-    print("Aborted by user\n")
+    print("Aborted by user")
 
