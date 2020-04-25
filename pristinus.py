@@ -37,6 +37,7 @@ def relay(on):
             GPIO.output(Relays,GPIO.LOW)
         else: LEDstatus=False
     except:  
+        apa102("error")
     	print("Oops, something wrong occurred!") 
     finally:  
     	GPIO.cleanup()
