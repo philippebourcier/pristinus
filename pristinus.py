@@ -15,31 +15,42 @@ Relays=[22,23,25]
 Emergency=29
 Door=31
 
+# available / error / running
 def apa102(scene):
     req=Request("http://localhost/cmd?scene="+scene+"&status=start")
     try:
-        response = urlopen(req)
+        response=urlopen(req)
     except HTTPError as e:
-            print('Error code: ', e.code)
+        print('Error code: ', e.code)
     except URLError as e:
-            print('Reason: ', e.reason)
+        print('Reason: ', e.reason)
     else:
-            print(scene)
+        print(scene)
 
-def stop():
+def relay(on):
+    if on: state=GPIO.HIGH
+    else: state=GPIO.LOW
     try:
-        GPIO.output(Relays,GPIO.HIGH)
-        apa102("available")
+        GPIO.output(Relays,on)
+    except KeyboardInterrupt:  
+    	print("Aborted by user\n")
+    except:  
+    	print("Oops, something wrong occurred!") 
+    finally:  
+    	GPIO.cleanup()
 
-
-def uvled():
-    if(LEDstatus):
-        stop()
+def uvled(why):
+    if why==Emergency:
+        if LEDstatus:
+            relay(False)
+            apa102("error")
     else:
-        start()
-
-# available / error / running
-# get("available")
+        if LEDstatus:
+            relay(False)
+            apa102("available")
+        else:
+            relay(True)
+            apa102("running")
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
