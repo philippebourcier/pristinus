@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
+# LIBS
 import RPi.GPIO as GPIO
 from time import sleep
-
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
@@ -32,6 +32,7 @@ def apa102(scene):
     else:
         print(scene)
 
+# Control the relay that starts the UVC LED for a specific amount of time
 def relay(on):
     global LEDstatus
     try:
@@ -55,7 +56,16 @@ def relay(on):
     finally:  
     	GPIO.cleanup()
 
+# Callback for the 
 def uvled(why):
+    # STATE ?
+    sw_state=False
+    if GPIO.input(why):
+        sw_state=False
+        print("Switch is open.")
+    else:
+        sw_state=True
+        print("Switch is closed.")
     # BIG RED BUTTON
     if why==Emergency:
         if LEDstatus:
@@ -80,7 +90,7 @@ GPIO.setup(Relays,GPIO.OUT,initial=GPIO.LOW)
 # COUPURE
 GPIO.setup(Emergency,GPIO.IN,pull_up_down=GPIO.PUD_UP)
 GPIO.setup(Door,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.add_event_detect(Emergency,GPIO.RISING,callback=uvled,bouncetime=200)
+GPIO.add_event_detect(Emergency,GPIO.RISING,callback=uvled,bouncetime=500)
 GPIO.add_event_detect(Door,GPIO.BOTH,callback=uvled,bouncetime=500)
 
 # GREEN
