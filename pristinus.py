@@ -25,17 +25,15 @@ def apa102(scene):
 
 def relay(on):
     global LEDstatus
-    if on:
-        state=GPIO.HIGH
-    else:
-        state=GPIO.LOW
     try:
-        GPIO.output(Relays,state)
         if on:
+            GPIO.output(Relays,GPIO.HIGH)
             LEDstatus=True
             sleep(20)
             GPIO.output(Relays,GPIO.LOW)
-        else: LEDstatus=False
+        else:
+            GPIO.output(Relays,GPIO.LOW)
+            LEDstatus=False
     except:  
         apa102("error")
         print("Oops, something wrong occurred!") 
