@@ -6,12 +6,21 @@ from time import sleep
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
+### VARIABLES
 LEDstatus=False
+# PINS FOR RELAY CONTROL
 Relays=[22,23,25]
+# PIN FOR BIG RED BUTTON
 Emergency=29
+# PIN FOR DOOR SWITCH
 Door=31
+# DEFAULT SLEEP TIME
+sleep_d=30
+# MAX SLEEP TIME
+sleep_max=300
+###
 
-# available / error / running
+# apa102 : available / error / running
 def apa102(scene):
     req=Request("http://localhost/cmd?scene="+scene+"&status=start")
     try:
@@ -29,7 +38,13 @@ def relay(on):
         if on:
             GPIO.output(Relays,GPIO.HIGH)
             LEDstatus=True
-            sleep(20)
+            try:
+                with open("/tmp/pristinus_sleep.txt","r") as f:
+                    sleep_t=int(f.read().strip())
+                    if sleep_t>0 and sleep_t<sleep_max: sleep(sleep_t)
+                    else: sleep(sleep_d)
+            except EnvironmentError:
+                sleep(sleep_d)
             GPIO.output(Relays,GPIO.LOW)
         else:
             GPIO.output(Relays,GPIO.LOW)
