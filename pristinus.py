@@ -5,8 +5,6 @@ import sys
 from daemonize import Daemonize
 import RPi.GPIO as GPIO
 from time import sleep
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
 import requests
 
 ### VARIABLES & PINS
@@ -22,7 +20,7 @@ Door=18
 def httpget(url):
     try:
         requests.get(url,timeout=1)
-    except requests.exceptions.ReadTimeout: 
+    except: 
         pass
 
 # Control the relay that starts the UVC LED for a specific amount of time
@@ -38,14 +36,19 @@ def emerg_sw(who):
 def door_sw(who):
     global IsStarted
     if GPIO.input(who):
-            if IsStarted==0:
-                IsStarted=1
-                sleep(1)
-                relay("on")
+        if IsStarted==0:
+            IsStarted=1
+            sleep(1)
+            relay("on")
     else:
-        relay("off")
-        sleep(3)
-        IsStarted=0
+        if IsStarted==1:
+            relay("emerg")
+            GPIO.cleanup()
+            sys.exit("Now you have to reboot the whole machine...")
+        else:
+            relay("off")
+            sleep(3)
+            IsStarted=0
 
 def main():
     # INIT

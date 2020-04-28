@@ -12,5 +12,6 @@ if [ -d /opt/pristinus/ledskipper ]; then
 fi
 
 # this software
-nohup /opt/pristinus/pristinus.py &>/var/log/pristinus.log &
+/opt/pristinus/pristinus.py -d &>/var/log/pristinus.log &
+/opt/pristinus/pristinus-relayd.py -d &>/var/log/pristinus-relayd.log &
 

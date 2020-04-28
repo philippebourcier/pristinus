@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 
+from daemonize import Daemonize
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
-import threading
 import RPi.GPIO as GPIO
 from time import sleep
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
+import os
 import sys
+import requests
 
 ### VARIABLES & PINS
-pid="/var/run/relayd.pid"
+pid="/var/run/pristinus-relayd.pid"
 ON=True
 OFF=False
 # PINS FOR RELAY CONTROL (23-24) DEFINED IN /opt/pristinus/data/pristinus_relays.txt
@@ -22,8 +22,8 @@ sleep_max=300
 
 def httpget(url):
     try:
-        requests.get(url,timeout=1)
-    except requests.exceptions.ReadTimeout:
+        requests.get(url,timeout=3)
+    except:
         pass
 
 # sleep for some seconds...
@@ -81,20 +81,23 @@ class Handler(BaseHTTPRequestHandler):
             relay(OFF)
             apa102("error")
             self.wfile.write("EMERG".encode('utf-8'))
-            GPIO.cleanup()
-            sys.exit("Now you have to reboot the whole machine...")
-        else :
+        else:
             self.wfile.write("".encode('utf-8'))
+    def log_message(self,format,*args):
+        return
 
 class ThreadingSimpleServer(ThreadingMixIn,HTTPServer): pass
 
-def run():
-    server=ThreadingSimpleServer(('127.0.0.1',8000),Handler)
-    server.serve_forever()
-
-if __name__ == '__main__':
+def main():
     try:
-    	run()
+        server=ThreadingSimpleServer(('127.0.0.1',8000),Handler)
+        server.serve_forever()
     except KeyboardInterrupt:
         print('\nFinished.')
+
+if len(sys.argv)==2 and sys.argv[1]=="-d":
+    daemon=Daemonize(app="pristinus-relayd",pid=pid,action=main)
+    daemon.start()
+else:
+    main()
 
