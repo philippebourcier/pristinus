@@ -1,2 +1,2 @@
-# pristinus
+# Pristinus
 Pristinus source code
