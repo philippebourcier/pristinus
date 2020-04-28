@@ -82,14 +82,15 @@ def door_sw(who):
     global IsStarted
     if GPIO.input(who):
             if IsStarted==0:
-                print("Door is closed => relay ON")
-                relay(ON)
                 IsStarted=1
+                print("Door is closed => relay ON")
+                sleep(1)
+                relay(ON)
     else:
         print("Door is opened => relay OFF")
         relay(OFF)
-        sleep(3)
         apa102("available")
+        sleep(3)
         IsStarted=0
 
 def main():
@@ -103,8 +104,8 @@ def main():
     GPIO.setup(Door,GPIO.IN,pull_up_down=GPIO.PUD_UP)
     emerg_sw(Emergency)
     apa102("available")
-    GPIO.add_event_detect(Emergency,GPIO.RISING,callback=emerg_sw,bouncetime=500)
-    GPIO.add_event_detect(Door,GPIO.BOTH,callback=door_sw,bouncetime=500)
+    GPIO.add_event_detect(Emergency,GPIO.RISING,callback=emerg_sw,bouncetime=50)
+    GPIO.add_event_detect(Door,GPIO.BOTH,callback=door_sw,bouncetime=3000)
 
     try:
         while True:
@@ -116,6 +117,6 @@ def main():
 
 main()
 
-daemon=Daemonize(app="pristinus",pid=pid,action=main)
-daemon.start()
+#daemon=Daemonize(app="pristinus",pid=pid,action=main)
+#daemon.start()
 
