@@ -115,8 +115,6 @@ def main():
         relay(OFF)
         GPIO.cleanup()
 
-main()
-
-#daemon=Daemonize(app="pristinus",pid=pid,action=main)
-#daemon.start()
+daemon=Daemonize(app="pristinus",pid=pid,action=main)
+daemon.start()
 
