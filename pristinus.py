@@ -8,12 +8,14 @@ from time import sleep
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
+from datetime import datetime
+
 ### VARIABLES & PINS
 pid="/var/run/pristinus.pid"
 ON=True
 OFF=False
-# PINS FOR RELAY CONTROL (23-24)
-with open("/opt/pristinus/data/pristinus_relays.txt","r") as f: Relays=f.read().splitlines()
+IsStarted=0
+# PINS FOR RELAY CONTROL (23-24) DEFINED IN /opt/pristinus/data/pristinus_relays.txt
 # PIN FOR BIG RED BUTTON
 Emergency=17
 # PIN FOR DOOR SWITCH
@@ -49,18 +51,23 @@ def cusleep():
 # Control the relay that starts the UVC LED for a specific amount of time
 def relay(state):
     try:
+        with open("/opt/pristinus/data/pristinus_relays.txt","r") as f: RelaysStr=f.read().splitlines()
+        Relays=list(map(int,RelaysStr))
+        GPIO.setup(Relays,GPIO.OUT,initial=GPIO.LOW)
         if state:
             apa102("running")
-            if Relays: GPIO.output(Relays,GPIO.HIGH)
+            GPIO.output(Relays,GPIO.HIGH)
             print("On allume XXs les LEDs...")
             cusleep()
-            if Relays: GPIO.output(Relays,GPIO.LOW)
+            GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
             apa102("available")
         else:
-            if Relays: GPIO.output(Relays,GPIO.LOW)
+            GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
-    except:
+    #except:
+    except Exception as e:
+        print(e)
         apa102("error")
         print("Oops, something wrong occurred!")
         sys.exit("Now you have to reboot the whole machine...")
@@ -72,15 +79,21 @@ def emerg_sw(who):
         sys.exit("Now you have to reboot the whole machine...")
 
 def door_sw(who):
+    global IsStarted
     if GPIO.input(who):
-        print("Door is closed => relay ON")
-        relay(ON)
+            if IsStarted==0:
+                print("Door is closed => relay ON")
+                relay(ON)
+                IsStarted=1
     else:
         print("Door is opened => relay OFF")
         relay(OFF)
+        sleep(3)
         apa102("available")
+        IsStarted=0
 
 def main():
+
     # INIT
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
@@ -101,6 +114,8 @@ def main():
         relay(OFF)
         GPIO.cleanup()
 
-daemon=Daemonize(app="pristinus",pid=pid,action=main)
-daemon.start()
+main()
+
+#daemon=Daemonize(app="pristinus",pid=pid,action=main)
+#daemon.start()
 

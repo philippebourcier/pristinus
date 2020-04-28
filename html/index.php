@@ -9,6 +9,17 @@
   <script src="js/jquery-ui.min.js"></script>
   <script src="js/jquery.ui.touch-punch.min.js"></script>
 <script>
+
+function en_save() {
+	$("#save").attr("disabled",false);
+        $("#save").css("background-color","#F6F6F6");
+}
+
+function dis_save() {
+        $("#save").attr("disabled",true);
+	$("#save").css("background-color","lightsteelblue");
+}
+
   $( function() {
 
     $("input:checkbox").checkboxradio();
@@ -23,7 +34,7 @@
 $r="";
 if($_POST["r_23"]=="on") $r.="23\n";
 if($_POST["r_24"]=="on") $r.="24\n";
-file_put_contents("/opt/pristinus/data/pristinus_relays.txt",$r);
+if($_POST["r_23"]=="on" || $_POST["r_24"]=="on") file_put_contents("/opt/pristinus/data/pristinus_relays.txt",$r);
 
 if($_POST["lsec"]!=null) file_put_contents("/opt/pristinus/data/pristinus_sleep.txt",$_POST["lsec"]."\n");
 
@@ -35,7 +46,7 @@ else echo("value: ".trim($zsleep).",");
 
 ?>
       slide: function(event,ui) {
-	      if($("#save").attr("disabled")) $("#save").attr("disabled",false);
+	      if($("#save").attr("disabled")) en_save();
 	      $("#amount").val(ui.value);
       }
     });
@@ -44,7 +55,7 @@ else echo("value: ".trim($zsleep).",");
 
 <?php
 
-if($_POST["lsec"]!=null) echo("$(\"#save\").attr(\"disabled\",true);\n");
+if($_POST["lsec"]!=null) echo("dis_save();\n");
 
 $relays=explode("\n",@file_get_contents("/opt/pristinus/data/pristinus_relays.txt"));
 for($i=0,$max=count($relays);$i<$max;$i++) if($relays[$i]!="") echo '$("#r_'.$relays[$i].'").attr("checked",true);'."\n";
@@ -53,7 +64,7 @@ for($i=0,$max=count($relays);$i<$max;$i++) if($relays[$i]!="") echo '$("#r_'.$re
 
     $("input:checkbox").checkboxradio( "refresh" );
     $("input:checkbox").bind('change', function() {
-             if($("#save").attr("disabled")) $("#save").attr("disabled",false);
+             if($("#save").attr("disabled")) en_save();
     });
 
   } );
@@ -93,10 +104,10 @@ table {
 <blockquote>
     <br/>
     <div class="toggles">
-      <label for="r_24">Top 36 LEDs 0.2W 265nm 14mJ</label>
+      <label for="r_24">Sides 2x36 LEDs 0.5W 277nm 10mJ</label>
       <input class="toggle" type="checkbox" name="r_24" id="r_24">
       <br/><br/>
-      <label for="r_23">Sides 2x36 LEDs 0.5W 277nm 10mJ</label>
+      <label for="r_23">Top 36 LEDs 0.2W 265nm 14mJ</label>
       <input class="toggle" type="checkbox" name="r_23" id="r_23">
     </div>
    <br/><br/>
