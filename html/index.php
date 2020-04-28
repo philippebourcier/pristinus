@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pristinus Configuration</title>
   <link rel="stylesheet" href="css/jquery-ui.css">
-  <script src="js/jquery-1.12.4.js"></script>
-  <script src="js/jquery-ui.js"></script>
+  <script src="js/jquery-1.12.4.min.js"></script>
+  <script src="js/jquery-ui.min.js"></script>
   <script src="js/jquery.ui.touch-punch.min.js"></script>
 <script>
   $( function() {
