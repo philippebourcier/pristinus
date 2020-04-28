@@ -65,16 +65,16 @@ def relay(state):
         else:
             GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
-    #except:
     except Exception as e:
-        print(e)
         apa102("error")
+        print(e)
         print("Oops, something wrong occurred!")
         sys.exit("Now you have to reboot the whole machine...")
 
 def emerg_sw(who):
     if not GPIO.input(who):
         relay(OFF)
+        GPIO.cleanup()
         apa102("error")
         sys.exit("Now you have to reboot the whole machine...")
 
