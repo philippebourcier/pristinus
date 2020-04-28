@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/jquery-ui.css">
   <script src="js/jquery-1.12.4.js"></script>
   <script src="js/jquery-ui.js"></script>
+  <script src="js/jquery.ui.touch-punch.min.js"></script>
 <script>
   $( function() {
 
@@ -80,7 +81,7 @@ table {
 <form method="POST" action="/">
 <p>
   <label for="amount">Number of seconds to run UVC LEDs :</label>
-  <input name="lsec" type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+  <input name="lsec" type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold; font-size: 1.2em;">
 </p>
 <div id="slider"></div>
 <br/><br/>
