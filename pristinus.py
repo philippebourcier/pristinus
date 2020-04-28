@@ -2,16 +2,18 @@
 
 # LIBS
 import sys
+from daemonize import Daemonize
 import RPi.GPIO as GPIO
 from time import sleep
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 ### VARIABLES & PINS
+pid="/var/run/pristinus.pid"
 ON=True
 OFF=False
-# PINS FOR RELAY CONTROL
-with open("/tmp/pristinus_relays.txt","r") as f: Relays=f.read().splitlines()
+# PINS FOR RELAY CONTROL (23-24)
+with open("/var/opt/pristinus_relays.txt","r") as f: Relays=f.read().splitlines()
 # PIN FOR BIG RED BUTTON
 Emergency=17
 # PIN FOR DOOR SWITCH
@@ -37,7 +39,7 @@ def apa102(scene):
 # sleep for some seconds...
 def cusleep():
     try:
-        with open("/tmp/pristinus_sleep.txt","r") as f:
+        with open("/var/opt/pristinus_sleep.txt","r") as f:
             sleep_t=int(f.read().strip())
             if sleep_t>=10 and sleep_t<sleep_max: sleep(sleep_t)
             else: sleep(sleep_d)
@@ -49,14 +51,14 @@ def relay(state):
     try:
         if state:
             apa102("running")
-            GPIO.output(Relays,GPIO.HIGH)
+            if Relays: GPIO.output(Relays,GPIO.HIGH)
             print("On allume XXs les LEDs...")
             cusleep()
-            GPIO.output(Relays,GPIO.LOW)
+            if Relays: GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
             apa102("available")
         else:
-            GPIO.output(Relays,GPIO.LOW)
+            if Relays: GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
     except:
         apa102("error")
@@ -78,23 +80,27 @@ def door_sw(who):
         relay(OFF)
         apa102("available")
 
-# INIT
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
+def main():
+    # INIT
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
 
-# COUPURE
-GPIO.setup(Emergency,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-GPIO.setup(Door,GPIO.IN,pull_up_down=GPIO.PUD_UP)
-emerg_sw(Emergency)
-apa102("available")
-GPIO.add_event_detect(Emergency,GPIO.RISING,callback=emerg_sw,bouncetime=500)
-GPIO.add_event_detect(Door,GPIO.BOTH,callback=door_sw,bouncetime=500)
+    # COUPURE
+    GPIO.setup(Emergency,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(Door,GPIO.IN,pull_up_down=GPIO.PUD_UP)
+    emerg_sw(Emergency)
+    apa102("available")
+    GPIO.add_event_detect(Emergency,GPIO.RISING,callback=emerg_sw,bouncetime=500)
+    GPIO.add_event_detect(Door,GPIO.BOTH,callback=door_sw,bouncetime=500)
 
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    print("\nAborted by user")
-    relay(OFF)
-    GPIO.cleanup()
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        print("\nAborted by user")
+        relay(OFF)
+        GPIO.cleanup()
+
+daemon=Daemonize(app="pristinus",pid=pid,action=main)
+daemon.start()
 
