@@ -22,13 +22,13 @@
 $r="";
 if($_POST["r_23"]=="on") $r.="23\n";
 if($_POST["r_24"]=="on") $r.="24\n";
-file_put_contents("/var/opt/pristinus_relays.txt",$r);
+file_put_contents("/opt/pristinus/data/pristinus_relays.txt",$r);
 
-if($_POST["lsec"]!=null) file_put_contents("/var/opt/pristinus_sleep.txt",$_POST["lsec"]."\n");
+if($_POST["lsec"]!=null) file_put_contents("/opt/pristinus/data/pristinus_sleep.txt",$_POST["lsec"]."\n");
 
 sleep(0.25);
 
-$zsleep=@file_get_contents("/var/opt/pristinus_sleep.txt");
+$zsleep=@file_get_contents("/opt/pristinus/data/pristinus_sleep.txt");
 if($zsleep===FALSE) echo("value: 30,");
 else echo("value: ".trim($zsleep).",");
 
@@ -45,7 +45,7 @@ else echo("value: ".trim($zsleep).",");
 
 if($_POST["lsec"]!=null) echo("$(\"#save\").attr(\"disabled\",true);\n");
 
-$relays=explode("\n",@file_get_contents("/var/opt/pristinus_relays.txt"));
+$relays=explode("\n",@file_get_contents("/opt/pristinus/data/pristinus_relays.txt"));
 for($i=0,$max=count($relays);$i<$max;$i++) if($relays[$i]!="") echo '$("#r_'.$relays[$i].'").attr("checked",true);'."\n";
 
 ?>

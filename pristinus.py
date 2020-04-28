@@ -13,7 +13,7 @@ pid="/var/run/pristinus.pid"
 ON=True
 OFF=False
 # PINS FOR RELAY CONTROL (23-24)
-with open("/var/opt/pristinus_relays.txt","r") as f: Relays=f.read().splitlines()
+with open("/opt/pristinus/data/pristinus_relays.txt","r") as f: Relays=f.read().splitlines()
 # PIN FOR BIG RED BUTTON
 Emergency=17
 # PIN FOR DOOR SWITCH
@@ -39,7 +39,7 @@ def apa102(scene):
 # sleep for some seconds...
 def cusleep():
     try:
-        with open("/var/opt/pristinus_sleep.txt","r") as f:
+        with open("/opt/pristinus/data/pristinus_sleep.txt","r") as f:
             sleep_t=int(f.read().strip())
             if sleep_t>=10 and sleep_t<sleep_max: sleep(sleep_t)
             else: sleep(sleep_d)
