@@ -14,6 +14,7 @@ pid="/var/run/pristinus-relayd.pid"
 ON=True
 OFF=False
 BigRedButton=False
+IsStarted=False
 # PINS FOR RELAY CONTROL (23-24) DEFINED IN /opt/pristinus/data/pristinus_relays.txt
 # DEFAULT SLEEP TIME
 sleep_d=40
@@ -42,21 +43,25 @@ def apa102(scene):
     httpget("http://localhost/cmd?scene="+scene+"&status=start")
 
 # Control the relay that starts the UVC LED for a specific amount of time
-def relay(state):
+def relay(start):
     try:
         # INIT
+        global IsStarted
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         with open("/opt/pristinus/data/pristinus_relays.txt","r") as f: RelaysStr=f.read().splitlines()
         Relays=list(map(int,RelaysStr))
         GPIO.setup(Relays,GPIO.OUT,initial=GPIO.LOW)
-        if state:
+        if start:
+            IsStarted=True
             apa102("running")
             GPIO.output(Relays,GPIO.HIGH)
             print("On allume XXs les LEDs...")
             cusleep()
-            GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
+            GPIO.output(Relays,GPIO.LOW)
+            sleep(2)
+            IsStarted=False
         else:
             GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
@@ -68,6 +73,7 @@ def relay(state):
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         global BigRedButton
+        global IsStarted
         self.send_response(200)
         self.send_header('Content-type','text/html')
         self.end_headers()
@@ -79,7 +85,8 @@ class Handler(BaseHTTPRequestHandler):
             elif self.path == "/off":
                 relay(OFF)
                 apa102("available")
-                self.wfile.write("OFF".encode('utf-8'))
+            elif self.path == "/status":
+                self.wfile.write(str(IsStarted).encode('utf-8'))
             elif self.path == "/emerg":
                 BigRedButton=True
                 relay(OFF)

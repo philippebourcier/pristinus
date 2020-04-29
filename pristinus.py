@@ -9,7 +9,6 @@ import requests
 
 ### VARIABLES & PINS
 pid="/var/run/pristinus.pid"
-IsStarted=0
 # PIN FOR BIG RED BUTTON
 Emergency=17
 # PIN FOR DOOR SWITCH
@@ -23,6 +22,17 @@ def httpget(url):
     except: 
         pass
 
+# HTTP GET STATUS OF UVC LEDS
+def getstatus():
+    try:
+        r=requests.get("http://localhost:8000/status",timeout=5)
+        cont=r.text.strip()
+        if(cont=="True"): return True
+        else: return False
+    except:
+        return True
+        pass
+
 # Control the relay that starts the UVC LED for a specific amount of time
 def relay(state):
     httpget("http://localhost:8000/"+state)
@@ -34,21 +44,19 @@ def emerg_sw(who):
         sys.exit("Now you have to reboot the whole machine...")
 
 def door_sw(who):
-    global IsStarted
     if GPIO.input(who):
-        if IsStarted==0:
-            IsStarted=1
+        if getstatus()==False:
             sleep(1)
             relay("on")
     else:
-        if IsStarted==1:
-            relay("emerg")
-            GPIO.cleanup()
-            sys.exit("Now you have to reboot the whole machine...")
-        else:
+        if getstatus()==False:
             relay("off")
             sleep(3)
             IsStarted=0
+        else:
+            relay("emerg")
+            GPIO.cleanup()
+            sys.exit("Now you have to reboot the whole machine...") 
 
 def main():
     # INIT
