@@ -13,6 +13,7 @@ import requests
 pid="/var/run/pristinus-relayd.pid"
 ON=True
 OFF=False
+BigRedButton=False
 # PINS FOR RELAY CONTROL (23-24) DEFINED IN /opt/pristinus/data/pristinus_relays.txt
 # DEFAULT SLEEP TIME
 sleep_d=40
@@ -56,7 +57,6 @@ def relay(state):
             cusleep()
             GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
-            apa102("available")
         else:
             GPIO.output(Relays,GPIO.LOW)
             print("On éteint les LEDs")
@@ -67,22 +67,28 @@ def relay(state):
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
+        global BigRedButton
         self.send_response(200)
         self.send_header('Content-type','text/html')
         self.end_headers()
-        if self.path == "/on":
-            relay(ON)
-            self.wfile.write("ON".encode('utf-8'))
-        elif self.path == "/off":
-            relay(OFF)
-            apa102("available")
-            self.wfile.write("OFF".encode('utf-8'))
-        elif self.path == "/emerg":
-            relay(OFF)
-            apa102("error")
-            self.wfile.write("EMERG".encode('utf-8'))
+        if not BigRedButton:
+            if self.path == "/on":
+                relay(ON)
+                if not BigRedButton: apa102("available")
+                self.wfile.write("ON".encode('utf-8'))
+            elif self.path == "/off":
+                relay(OFF)
+                apa102("available")
+                self.wfile.write("OFF".encode('utf-8'))
+            elif self.path == "/emerg":
+                BigRedButton=True
+                relay(OFF)
+                apa102("error")
+                self.wfile.write("EMERG".encode('utf-8'))
+            else:
+                self.wfile.write("".encode('utf-8'))
         else:
-            self.wfile.write("".encode('utf-8'))
+            self.wfile.write("STOPPED".encode('utf-8'))
     def log_message(self,format,*args):
         return
 
@@ -90,6 +96,7 @@ class ThreadingSimpleServer(ThreadingMixIn,HTTPServer): pass
 
 def main():
     try:
+        apa102("available")
         server=ThreadingSimpleServer(('127.0.0.1',8000),Handler)
         server.serve_forever()
     except KeyboardInterrupt:
