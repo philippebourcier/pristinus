@@ -6,6 +6,8 @@ from daemonize import Daemonize
 import RPi.GPIO as GPIO
 from time import sleep
 import requests
+import os
+from signal import pause
 
 ### VARIABLES & PINS
 pid="/var/run/pristinus.pid"
@@ -26,9 +28,7 @@ def httpget(url):
 def getstatus():
     try:
         r=requests.get("http://localhost:8000/status",timeout=5)
-        cont=r.text.strip()
-        if(cont=="True"): return True
-        else: return False
+        return r.text.strip()
     except:
         return True
         pass
@@ -40,23 +40,25 @@ def relay(state):
 def emerg_sw(who):
     if not GPIO.input(who):
         relay("emerg")
-        GPIO.cleanup()
-        sys.exit("Now you have to reboot the whole machine...")
+        #GPIO.cleanup()
+        #sys.exit("Now you have to reboot the whole machine...")
+    else:
+        if getstatus()=="STOPPED":
+            os.system('systemctl reboot')
 
 def door_sw(who):
     if GPIO.input(who):
-        if getstatus()==False:
+        if getstatus()=="False":
             sleep(1)
             relay("on")
     else:
-        if getstatus()==False:
+        if getstatus()=="False":
             relay("off")
             sleep(3)
-            IsStarted=0
         else:
             relay("emerg")
-            GPIO.cleanup()
-            sys.exit("Now you have to reboot the whole machine...") 
+            #GPIO.cleanup()
+            #sys.exit("Now you have to reboot the whole machine...") 
 
 def main():
     # INIT
@@ -70,7 +72,7 @@ def main():
     GPIO.add_event_detect(Door,GPIO.BOTH,callback=door_sw,bouncetime=3000)
     try:
         while True:
-            pass
+            pause()
     except KeyboardInterrupt:
         print("\nAborted by user")
         relay("off")

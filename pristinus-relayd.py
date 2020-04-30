@@ -5,7 +5,6 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import RPi.GPIO as GPIO
 from time import sleep
-import os
 import sys
 import requests
 
